@@ -198,10 +198,12 @@ class DoxygenConfig:
         # Doxygen cfg items by option name
         self._cfg_items_dict = {}
         # Comments by name of option below it.
-        # Comments at end of file have key 'END'.
+        # Comments at end of file have key 'self._end_key'.
         self._cfg_comments_dict = {}
         # Key used for comments found after last option in Doxyfile
         self._end_key = 'END'
+        # Configuration to match Doxygen -g output (template Doxyfile)
+        self._char_count_before_equals = 23
 
     def load(self, doxyfile: str):
         """Load options and comments from `doxyfile`
@@ -262,28 +264,30 @@ class DoxygenConfig:
                     accumulated_other_lines = []
 
             # Any comments or blank lines found after last Doxygen option
-            # are stored with key 'END'.
+            # are represented in _cfg_comments_dict with key `self._end_key`.
             if accumulated_other_lines:
-                self._cfg_comments_dict['END'] = accumulated_other_lines
+                self._cfg_comments_dict[self._end_key] = accumulated_other_lines
                 accumulated_other_lines.clear()
 
-    def save(self, doxyfile: str):
-        """Store configuration to `doxyfile`.
+    def save(self, doxyfile: str, bare=False):
+        """Save configuration to `doxyfile`.
 
-        :param doxyfile:   Output path where Doxygen configuration will be
-                             written. If file exists, it will be overwritten.
+        :param doxyfile:  Output path where Doxygen configuration will be
+                            written. Overwrites file if it exists.
+        :param bare:      Do not preserve comments from loaded file.
         """
 
         lines = []
 
         for option_name, val in self._cfg_items_dict.items():
-            lines.extend(self._cfg_comments_dict[option_name])
+            if not bare:
+                lines.extend(self._cfg_comments_dict[option_name])
 
             if type(val) is list:
                 # We will be aligning the backslashes after the
                 # items in the list, so we need to know the longest.
                 # First value in list:
-                spaces25 = ' ' * 25
+                multi_line_indent = ' ' * (self._char_count_before_equals + 2)
                 longest_len = len(max(val, key=len))
                 val_w_len = val[0].ljust(longest_len)
                 lines.append(f'{option_name:<23}= {val_w_len}  \\')
@@ -292,18 +296,23 @@ class DoxygenConfig:
                 if len(val) > 2:
                     for temp in val[1:-1]:
                         val_w_len = temp.ljust(longest_len)
-                        lines.append(f'{spaces25}{val_w_len}  \\')
+                        lines.append(f'{multi_line_indent}{val_w_len}  \\')
 
                 # Last value in list:
-                lines.append(f'{spaces25}{val[-1]}')
+                lines.append(f'{multi_line_indent}{val[-1]}')
             elif type(val) is str:
+                val_w_len = option_name.ljust(self._char_count_before_equals)
                 if len(val) == 0:
-                    lines.append(f'{option_name:<23}=')
+                    lines.append(f'{val_w_len}=')
                 else:
-                    lines.append(f'{option_name:<23}= {val}')
+                    lines.append(f'{val_w_len}= {val}')
 
         if self._end_key in self._cfg_comments_dict:
-            lines.extend(self._cfg_comments_dict[self._end_key])
+            if not bare:
+                lines.extend(self._cfg_comments_dict[self._end_key])
+
+        # Ensure there is exactly 1 newline at end of file.
+        lines.append('')
 
         with open(doxyfile, 'w') as file:
             file.write('\n'.join(lines))
