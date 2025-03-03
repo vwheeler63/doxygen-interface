@@ -1,21 +1,31 @@
-"""Doxygen Configurations (from/to Doxyfiles)
+"""doxygen_config.py
+Python Interface to Doxygen Config Files (Doxyfiles)
+
+Author   :  "Victor Wheeler"
+Copyright:  "Copyright (C) 2025 WGA Crystal Research, Inc."
+License  :  "MIT"
+Version  :  "1.0"
 
 This work was inspired by the `doxygen-python-interface` project at
 https://github.com/TraceSoftwareInternational/doxygen-python-interface.
-Unfortunately, the ``configParser`` from that project could not be
-used because it both had important bugs and design flaws in it, and
+On 27-Feb-2025 I was engaged in a production project wherein I wanted
+to find a Python module that I could re-use to reliably work with
+Doxygen configuration files (Doxyfiles).  The best one I found was
+`doxygen-python-interface`.  Unfortunately, the ``configParser`` from
+that project could not be used because it both had important bugs and
+design flaws in it (conflicts with legal Doxygen config syntax), and
 it appears to have been abandoned after 26-Apr-2018, preventing these
 things from being remedied.
 
 So a brand-new module has been created herewith based on sound O-O design
 principles and a design that actually works in alignment with Doxygen
-configuration syntax rules instead of being in conflict  with them.
+configuration syntax.
 
 Usage:
 
     import doxygen_config
     ...
-    # 1. Load from Doxyfile.
+    # 1. Load configuration from Doxyfile.
     cfg = doxygen_config.DoxygenConfig()
     cfg.load(doxyfile_src_file)
 
@@ -24,7 +34,7 @@ Usage:
     ok_to_proceed = cfg.is_valid_option('PREDEFINED') \
         and cfg.is_valid_option('INPUT')
 
-    # 3. Update cfg.
+    # 3. Update it.
     if ok_to_proceed:
         temp = cfg.value('PREDEFINED')
         temp = temp.replace('<<LV_CONF_PATH>>', lv_conf_file)
@@ -35,14 +45,15 @@ Usage:
         cfg.set('INPUT', temp)
 
     # 4. Save it.
-    # The original comments and order of the options are both preserved.
+    # The original comments and order of config options are preserved.
+    # The ``bare`` argument discards comments from the output.
     cfg.save(cfg_dict, doxyfile_dst_file, bare=True)
 
-Design Differences from ``doxygen-python-interface``:
+Design Differences from `doxygen-python-interface`:
 
     - The DoxygenConfig class represents the actual Doxygen configuration,
-      in alignment with O-O theory --- it is not just be a storage place
-      for a set of functions that never needed to be a class.
+      in alignment with O-O theory --- it is not just a place to store a
+      set of functions that never needed to be a class.
 
     - If the user does a default ``save()`` (not requesting a "bare"
       version of the Doxygen configuration), the saved Doxyfile
@@ -86,7 +97,7 @@ Design Differences from ``doxygen-python-interface``:
       discarding the comments from the currently-loaded Doxyfile.
 
     - Input values are preserved exactly as they were found.  The
-      ``doxygen-python-interface``'s ``configParser`` class removed
+      `doxygen-python-interface`'s ``configParser`` class removed
       quotation marks from incoming values and added quotation marks
       to values containing spaces before storing them again.  While
       this "sounds nice", it was incompatible with Doxygen for every
@@ -107,7 +118,7 @@ Design Differences from ``doxygen-python-interface``:
 
       Thus, it is up to the user to know when values he is changing
       have space(s) AND ALSO need quotes and take appropriate measures
-      by adding them when needed and not otherwise.
+      by adding quotes when needed and not otherwise.
 
     - The storage of the list of Doxygen options is encapsulated
       in the instance of the DoxygenConfig class instead of being
@@ -182,13 +193,19 @@ import os
 import re
 
 
+__author__ = "Victor Wheeler"
+__copyright__ = "Copyright (C) 2025 WGA Crystal Research, Inc."
+__license__ = "MIT"
+__version__ = "1.0"
+
+
 class ParseException(Exception):
     """Exception thrown upon unexpected parsing errors."""
     pass
 
 
 class DoxygenConfig:
-    """Doxygen configurations"""
+    """Doxygen Configurations (from/to Doxyfiles)"""
 
     def __init__(self):
         """Prepare instantiated DoxygenConfig for use."""
