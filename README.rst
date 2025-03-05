@@ -40,6 +40,11 @@ Usage
         temp = temp.replace('<<SRC>>', f'"{pjt_src_dir}"')
         cfg.set('INPUT', temp)
 
+        cfg.set('OUTPUT_DIRECTORY', 'doxygen')
+        cfg.set('GENERATE_HTML', 'NO')
+        cfg.set('GENERATE_XML', 'YES')
+        cfg.set('XML_OUTPUT', "xml")
+
     # 4. Save it.
     # The original comments and order of config options are preserved.
     # The ``bare`` argument discards comments from the output.
@@ -90,9 +95,9 @@ Design Differences from ``doxygen-python-interface``
                                  */libs/tjpgd/tjp*         \
                                  */others/vg_lite_tvg/vg*
 
-  ``doxygen-python-interface`` did not save the comments so an
-  "edit in place" of a Doxyfile could be catastrophic if the
-  comments were needed as they often are in production scenarios.
+  ``doxygen-python-interface`` did not save the comments so an "edit in
+  place" of a Doxyfile could be catastrophic if the comments were needed
+  in the source Doxyfile as they often are in production scenarios.
 
 - The ``save()`` method has an optional ``bare`` argument (default False)
   that can be used to save a "bare" version of the Doxyfile options,
@@ -140,8 +145,9 @@ Design Differences from ``doxygen-python-interface``
   control on retaining valid Doxygen options.
 
   It is an error to attempt to set a value with an option name
-  that does not exist in the configuration.  A NameError
-  exception is raised if it is attempted.
+  that does not exist in the configuration.  A NameError exception
+  is raised if it is attempted.  Attempting to read the value of
+  an option name that does not exist returns the value ``None``.
 
   While Doxygen options change from time to time, it is up to the
   end user to use ``doxygen -u Doxyfile`` to keep his input
@@ -177,6 +183,8 @@ When one asks, "Is it appropriate to remove the quotation marks?"
 What if a value looked like this (2 quoted items in one line),
 removing quotation marks would be an error:
 
+.. code:: text
+
     "abc def" "ghi jkl"
 
 The ABBREVIATE_BRIEF list could indeed appear like this.
@@ -190,8 +198,10 @@ However, since Doxygen does not require this, there is still a
 strong argument for not tampering with quotation marks at all
 when importing values.  The strongest reasons are:
 
--   Doxygen can and does accept values like this where the value
-    of an option can be a list:
+-   Doxygen can and does accept values like this where the value of
+    an option can be a list.  Doxygen sees this as 2 separate values:
+
+    .. code:: text
 
         "abc def" "ghi jkl"
 
