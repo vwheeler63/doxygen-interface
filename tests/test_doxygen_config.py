@@ -9,7 +9,7 @@ from doxygen_config import DoxygenConfig  # NoQA
 class DoxygenConfigTest(unittest.TestCase):
     def test_doxygen_config_binary_match_output(self):
         cfg = DoxygenConfig()
-        f1 = 'Doxyfile'
+        f1 = 'resources/Doxyfile'
         f2 = 'Doxyfile_to_compare'
         cfg.load(f1)
         cfg.save(f2)
