@@ -37,11 +37,11 @@ Usage:
     # 3. Update it.
     if ok_to_proceed:
         temp = cfg.value('PREDEFINED')
-        temp = temp.replace('<<LV_CONF_PATH>>', lv_conf_file)
+        temp = temp.replace('<<CONFIG_PATH>>', config_file)
         cfg.set('PREDEFINED', temp)
 
         temp = cfg.value('INPUT')
-        temp = temp.replace('<<SRC>>', f'"{lvgl_src_dir}"')
+        temp = temp.replace('<<SRC>>', f'"{pjt_src_dir}"')
         cfg.set('INPUT', temp)
 
     # 4. Save it.
@@ -108,10 +108,10 @@ Design Differences from `doxygen-python-interface`:
 
         PREDEFINED             = USE_LIST USE_TABLE USE_CHART
 
-        PREDEFINED             = DOXYGEN LV_CONF_PATH="/path with spaces/to/lv_conf.h"
+        PREDEFINED             = DOXYGEN CONFIG_PATH="/path with spaces/to/config.h"
 
         PREDEFINED             = DOXYGEN \
-                                 LV_CONF_PATH="/path with spaces/to/lv_conf.h"
+                                 CONFIG_PATH="/path with spaces/to/config.h"
 
       These are all valid values for the PREDEFINED option and
       MUST NOT have quotes around any of them!
